@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Enrollment - Smart Attendance System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-camera"></i> Smart Attendance System
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('index') }}">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-user-plus"></i> Student Enrollment</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Register new students for the attendance system. Make sure the student is clearly visible in the camera before capturing.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enrollment Form -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-user-circle"></i> New Student Registration</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="enrollment-form">
+                            <div class="mb-3">
+                                <label for="student-name" class="form-label">Student Name</label>
+                                <input type="text" class="form-control" id="student-name" name="student_name" 
+                                       placeholder="Enter student's full name" required>
+                                <div class="form-text">Enter the full name of the student as it should appear in attendance records.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Camera Preview</label>
+                                <div class="video-container">
+                                    <img id="video-preview" src="{{ url_for('video_feed') }}" alt="Camera preview" class="img-fluid">
+                                </div>
+                                <div class="form-text">Make sure the student's face is clearly visible and well-lit.</div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg" id="enroll-btn">
+                                    <i class="fas fa-camera"></i> Capture & Enroll Student
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enrolled Students List -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-users"></i> Enrolled Students</h5>
+                        <span class="badge bg-primary">{{ students|length }} Total</span>
+                    </div>
+                    <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+                        <div id="enrolled-students-list">
+                            {% if students %}
+                                {% for student in students %}
+                                <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded student-item" data-student="{{ student }}">
+                                    <div>
+                                        <i class="fas fa-user text-primary"></i>
+                                        <strong>{{ student }}</strong>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-danger delete-student" data-student="{{ student }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-user-slash fa-3x mb-3"></i>
+                                    <p>No students enrolled yet</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enrollment Guidelines -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-lightbulb"></i> Enrollment Guidelines</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-check-circle text-success"></i> Do's:</h6>
+                                <ul>
+                                    <li>Ensure the student is looking directly at the camera</li>
+                                    <li>Make sure there's adequate lighting on the face</li>
+                                    <li>Remove glasses, hats, or masks if possible</li>
+                                    <li>Keep a neutral expression</li>
+                                    <li>Ensure only one person is in the camera frame</li>
+                                    <li>Stand at arm's length from the camera</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-times-circle text-danger"></i> Don'ts:</h6>
+                                <ul>
+                                    <li>Don't enroll with poor lighting or shadows</li>
+                                    <li>Don't have multiple people in the frame</li>
+                                    <li>Don't use blurry or unclear images</li>
+                                    <li>Don't enroll the same person twice</li>
+                                    <li>Don't tilt your head too much</li>
+                                    <li>Don't stand too close or too far from camera</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Note:</strong> Better enrollment photos lead to more accurate attendance tracking. Take time to ensure quality enrollment images.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete <strong id="delete-student-name"></strong> from the system? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div class="modal fade" id="alertModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="alertModalTitle">Notification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="alertModalBody">
+                    <!-- Alert message will be inserted here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Enrollment form handling
+        document.getElementById('enrollment-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const studentName = document.getElementById('student-name').value.trim();
+            const enrollBtn = document.getElementById('enroll-btn');
+            
+            if (!studentName) {
+                showAlert('Error', 'Please enter a student name.', 'danger');
+                return;
+            }
+            
+            // Disable button and show loading
+            enrollBtn.disabled = true;
+            enrollBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enrolling...';
+            
+            // Submit enrollment
+            const formData = new FormData();
+            formData.append('student_name', studentName);
+            
+            fetch('/enroll_student', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('Success', data.message, 'success');
+                    document.getElementById('student-name').value = '';
+                    // Refresh the page to update the enrolled students list
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showAlert('Error', data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                showAlert('Error', 'An error occurred during enrollment: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                // Re-enable button
+                enrollBtn.disabled = false;
+                enrollBtn.innerHTML = '<i class="fas fa-camera"></i> Capture & Enroll Student';
+            });
+        });
+        
+        // Delete student functionality
+        let studentToDelete = '';
+        
+        document.querySelectorAll('.delete-student').forEach(button => {
+            button.addEventListener('click', function() {
+                studentToDelete = this.getAttribute('data-student');
+                document.getElementById('delete-student-name').textContent = studentToDelete;
+                new bootstrap.Modal(document.getElementById('confirmModal')).show();
+            });
+        });
+        
+        document.getElementById('confirm-delete').addEventListener('click', function() {
+            if (studentToDelete) {
+                fetch(`/delete_student/${encodeURIComponent(studentToDelete)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('Success', data.message, 'success');
+                        // Remove the student from the list
+                        document.querySelector(`[data-student="${studentToDelete}"]`).remove();
+                        // Update the count badge
+                        const badge = document.querySelector('.badge.bg-primary');
+                        const currentCount = parseInt(badge.textContent.split(' ')[0]);
+                        badge.textContent = `${currentCount - 1} Total`;
+                    } else {
+                        showAlert('Error', data.message, 'danger');
+                    }
+                })
+                .catch(error => {
+                    showAlert('Error', 'An error occurred: ' + error.message, 'danger');
+                });
+                
+                // Hide modal
+                bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+                studentToDelete = '';
+            }
+        });
+        
+        // Alert function
+        function showAlert(title, message, type = 'info') {
+            document.getElementById('alertModalTitle').textContent = title;
+            document.getElementById('alertModalBody').innerHTML = `
+                <div class="alert alert-${type} mb-0">
+                    ${message}
+                </div>
+            `;
+            new bootstrap.Modal(document.getElementById('alertModal')).show();
+        }
+    </script>
+</body>
+</html>
