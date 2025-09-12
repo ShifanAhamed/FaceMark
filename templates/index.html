@@ -189,5 +189,86 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
+    <!-- Live Geofencing Script -->
+     <!--
+    <script>
+        const geofence = {
+            lat: 11.0168,  // replace with your location latitude
+            lng: 76.9558,  // replace with your location longitude
+            radius: 1000    // radius in meters
+        };
+
+        let geofenceInterval = null;
+
+        function getDistanceFromLatLng(lat1, lng1, lat2, lng2) {
+            const R = 6371000; // meters
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) ** 2 +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng/2) ** 2;
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function checkGeofence(callback) {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition((position) => {
+                const distance = getDistanceFromLatLng(
+                    position.coords.latitude,
+                    position.coords.longitude,
+                    geofence.lat,
+                    geofence.lng
+                );
+
+                if (distance > geofence.radius) {
+                    const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
+                    document.getElementById('alertModalTitle').innerText = "Geofence Alert";
+                    document.getElementById('alertModalBody').innerHTML = 
+                        "You are outside the allowed area. Attendance cannot be marked.";
+                    alertModal.show();
+                    document.getElementById('start-btn').disabled = true;
+                    if (callback) callback(false);
+                } else {
+                    document.getElementById('start-btn').disabled = false;
+                    if (callback) callback(true);
+                }
+            }, (error) => {
+                console.error(error);
+                alert("Unable to get your location");
+                if (callback) callback(false);
+            });
+        }
+
+        // Continuous geofence monitoring
+        function startGeofenceMonitoring() {
+            if (geofenceInterval) clearInterval(geofenceInterval);
+            geofenceInterval = setInterval(() => {
+                checkGeofence((inside) => {
+                    if (!inside) {
+                        // Stop attendance automatically
+                        document.getElementById('stop-btn').click();
+                        clearInterval(geofenceInterval);
+                    }
+                });
+            }, 5000); // check every 5 seconds
+        }
+
+        window.addEventListener('load', checkGeofence);
+        document.getElementById('start-btn').addEventListener('click', () => {
+            checkGeofence((inside) => {
+                if (inside) startGeofenceMonitoring();
+            });
+        });
+        document.getElementById('stop-btn').addEventListener('click', () => {
+            if (geofenceInterval) clearInterval(geofenceInterval);
+        });-->
+    </script>
 </body>
 </html>
